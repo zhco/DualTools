@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DualTools</string>
+    <string name="tab_ftp">FTP 工具</string>
+    <string name="tab_database">数据库</string>
+    <string name="ftp_connect">连接</string>
+    <string name="ftp_disconnect">断开</string>
+    <string name="ftp_upload">上传</string>
+    <string name="ftp_download">下载</string>
+    <string name="ftp_delete">删除</string>
+    <string name="ftp_rename">重命名</string>
+    <string name="ftp_new_folder">新建文件夹</string>
+    <string name="ftp_copy">复制</string>
+    <string name="ftp_paste">粘贴</string>
+    <string name="ftp_host">主机地址</string>
+    <string name="ftp_port">端口</string>
+    <string name="ftp_username">用户名</string>
+    <string name="ftp_password">密码</string>
+    <string name="db_type">数据库类型</string>
+    <string name="db_host">主机</string>
+    <string name="db_port">端口</string>
+    <string name="db_name">数据库名</string>
+    <string name="db_user">用户名</string>
+    <string name="db_password">密码</string>
+    <string name="db_connect">连接数据库</string>
+    <string name="db_disconnect">断开</string>
+    <string name="db_execute">执行</string>
+    <string name="db_tables">表列表</string>
+    <string name="db_query">查询</string>
+    <string name="db_insert">插入</string>
+    <string name="db_update">更新</string>
+    <string name="db_delete">删除</string>
+</resources>
