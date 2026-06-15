@@ -9,6 +9,8 @@ import org.apache.commons.net.ftp.FTPReply
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 data class FtpConnection(
     val host: String,
