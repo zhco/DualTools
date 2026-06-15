@@ -305,7 +305,7 @@ fun FtpScreen(viewModel: FtpViewModel) {
                             }
                         }
                     }
-                    HorizontalDivider(thickness = 0.5.dp)
+                    Divider(thickness = 0.5.dp)
                 }
             }
         } else {
