@@ -215,7 +215,7 @@ class DatabaseViewModel : ViewModel() {
         }
         isLoading = true
         viewModelScope.launch {
-            when (dbManager.deleteRow(table, where)) {
+            when (val result = dbManager.deleteRow(table, where)) {
                 is DbResult.Success -> {
                     statusMessage = "删除成功"
                     isError = false
