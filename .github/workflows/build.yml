@@ -27,31 +27,36 @@ jobs:
 
       - name: Generate Keystore
         run: |
-          keytool -genkey -v             -keystore dualtools.keystore             -alias dualtools             -keyalg RSA             -keysize 2048             -validity 36500             -storepass dualtools             -keypass dualtools             -dname "CN=DualTools"
+          keytool -genkey -v             -keystore dualtools.keystore             -alias dualtools             -keyalg RSA -keysize 2048 -validity 36500             -storepass dualtools -keypass dualtools             -dname "CN=DualTools"
 
-      - name: Download uber-apk-signer
+      - name: Setup Android SDK Build Tools
         run: |
-          curl -fsSL -o uber-apk-signer.jar             https://github.com/patrickfav/uber-apk-signer/releases/download/v1.3.0/uber-apk-signer-1.3.0.jar
-          ls -la uber-apk-signer.jar
+          mkdir -p $HOME/android-sdk
+          curl -fsSL -o /tmp/cmdline.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip -q /tmp/cmdline.zip -d /tmp
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          mv /tmp/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+          echo "y" | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk "build-tools;34.0.0" 2>&1 | tail -5
+          echo "$HOME/android-sdk/build-tools/34.0.0" >> $GITHUB_PATH
 
-      - name: Sign APK (v1+v2+v3)
+      - name: Sign APK (v1+v2)
         run: |
-          java -jar uber-apk-signer.jar             --apks app/build/outputs/apk/release/app-release.apk             --ks dualtools.keystore             --ksAlias dualtools             --ksPass dualtools             --ksKeyPass dualtools             --allowResign
+          apksigner sign --v1-signing-enabled true --v2-signing-enabled true             --ks dualtools.keystore --ks-pass pass:dualtools             --ks-key-alias dualtools --key-pass pass:dualtools             app/build/outputs/apk/release/app-release.apk
 
-      - name: Upload APK to Release
+      - name: Upload to Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ github.run_number }}
           name: DualTools v${{ github.run_number }}
-          files: app/build/outputs/apk/release/*-aligned-debugSigned.apk
+          files: app/build/outputs/apk/release/*.apk
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload APK Artifact
+      - name: Upload Artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: DualTools-APK
-          path: app/build/outputs/apk/release/*-aligned-debugSigned.apk
+          path: app/build/outputs/apk/release/*.apk
