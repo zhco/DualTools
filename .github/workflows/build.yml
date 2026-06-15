@@ -22,7 +22,7 @@ jobs:
       - name: Generate Keystore
         run: keytool -genkey -v -keystore dualtools.keystore -alias dualtools -keyalg RSA -keysize 2048 -validity 36500 -storepass dualtools -keypass dualtools -dname "CN=DualTools"
       - name: Sign APK
-        run: jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore dualtools.keystore -storepass dualtools -keypass dualtools app/build/outputs/apk/release/app-release.apk dualtools
+        run: jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore dualtools.keystore -storepass dualtools -keypass dualtools app/build/outputs/apk/release/app-release-unsigned.apk dualtools
       - name: Upload to Release
         uses: softprops/action-gh-release@v2
         with:
