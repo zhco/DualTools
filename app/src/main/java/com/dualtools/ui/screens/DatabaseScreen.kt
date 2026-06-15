@@ -443,7 +443,7 @@ private fun TablesDataView(
                                             )
                                         }
                                     }
-                                    HorizontalDivider(thickness = 0.5.dp)
+                                    Divider(thickness = 0.5.dp)
                                 }
                             }
                         }
@@ -552,7 +552,7 @@ private fun SqlEditorView(viewModel: DatabaseViewModel) {
                                     )
                                 }
                             }
-                            HorizontalDivider(thickness = 0.5.dp)
+                            Divider(thickness = 0.5.dp)
                         }
                     }
                 }
