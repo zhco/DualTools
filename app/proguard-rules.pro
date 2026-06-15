@@ -22,6 +22,9 @@
 -dontwarn javax.management.**
 -dontwarn oracle.net.**
 -dontwarn oracle.security.**
+-dontwarn oracle.i18n.**
+-dontwarn oracle.xdb.**
+-dontwarn org.slf4j.**
 
 # Keep data classes
 -keep class com.dualtools.ftp.FtpFileItem { *; }
