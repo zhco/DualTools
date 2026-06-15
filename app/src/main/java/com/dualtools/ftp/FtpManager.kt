@@ -31,6 +31,7 @@ sealed class FtpResult<out T> {
 }
 
 class FtpManager {
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
     private val ftpClient = FTPClient()
     private var connection: FtpConnection? = null
     private var currentPath = "/"
@@ -81,7 +82,7 @@ class FtpManager {
                     path = if (targetPath.endsWith("/")) "$targetPath${file.name}" else "$targetPath/${file.name}",
                     isDirectory = file.isDirectory,
                     size = file.size,
-                    lastModified = file.timestamp.formatted ?: "N/A"
+                    lastModified = file.timestamp?.time?.let { dateFormat.format(it) } ?: "N/A"
                 )
             }.sortedWith(compareByDescending<FtpFileItem> { it.isDirectory }.thenBy { it.name.lowercase() })
 
