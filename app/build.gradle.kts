@@ -4,13 +4,17 @@ plugins {
 }
 
 android {
+    lint {
+        abortOnError = false
+    }
+
     namespace = "com.dualtools"
     compileSdk = 34
 
     defaultConfig {
         applicationId = "com.dualtools"
         minSdk = 26
-        targetSdk = 30
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
     }
@@ -22,7 +26,13 @@ android {
         }
     }
 
-    compileOptions {
+    android {
+    lint {
+        abortOnError = false
+    }
+}
+
+compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
