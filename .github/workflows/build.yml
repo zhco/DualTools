@@ -25,6 +25,14 @@ jobs:
       - name: Build Release APK
         run: gradle assembleRelease
 
+      - name: Generate Keystore
+        run: |
+          keytool -genkey -v             -keystore app/dualtools.keystore             -alias dualtools             -keyalg RSA             -keysize 2048             -validity 36500             -storepass dualtools             -keypass dualtools             -dname "CN=DualTools, OU=Dev, O=DualTools, L=BJ, ST=BJ, C=CN"
+
+      - name: Sign APK (v1+v2+v3)
+        run: |
+          apksigner sign             --ks app/dualtools.keystore             --ks-pass pass:dualtools             --ks-key-alias dualtools             --key-pass pass:dualtools             app/build/outputs/apk/release/app-release.apk
+
       - name: Upload APK to Release
         uses: softprops/action-gh-release@v2
         with:
@@ -36,6 +44,7 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
 
       - name: Upload APK Artifact
         if: always()
