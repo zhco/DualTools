@@ -167,7 +167,7 @@ class DatabaseViewModel : ViewModel() {
         }
         isLoading = true
         viewModelScope.launch {
-            when (dbManager.insertRow(table, values)) {
+            when (val result = dbManager.insertRow(table, values)) {
                 is DbResult.Success -> {
                     statusMessage = "插入成功"
                     isError = false
@@ -191,7 +191,7 @@ class DatabaseViewModel : ViewModel() {
         }
         isLoading = true
         viewModelScope.launch {
-            when (dbManager.updateRow(table, values, where)) {
+            when (val result = dbManager.updateRow(table, values, where)) {
                 is DbResult.Success -> {
                     statusMessage = "更新成功"
                     isError = false
