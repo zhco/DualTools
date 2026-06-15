@@ -7,15 +7,6 @@ android {
     namespace = "com.dualtools"
     compileSdk = 34
 
-    signingConfigs {
-        create("release") {
-            storeFile = file("dualtools.keystore")
-            storePassword = "dualtools"
-            keyAlias = "dualtools"
-            keyPassword = "dualtools"
-        }
-    }
-
     defaultConfig {
         applicationId = "com.dualtools"
         minSdk = 26
@@ -27,7 +18,6 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
-            signingConfig = signingConfigs.getByName("release")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
