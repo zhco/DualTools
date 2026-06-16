@@ -19,6 +19,15 @@ android {
         versionName = "1.0.0"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = rootProject.file("dualtools.keystore")
+            storePassword = "dualtools"
+            keyAlias = "dualtools"
+            keyPassword = "dualtools"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
