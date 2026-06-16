@@ -25,21 +25,18 @@ android {
             storePassword = "dualtools"
             keyAlias = "dualtools"
             keyPassword = "dualtools"
+            enableV1Signing = true
+            enableV2Signing = true
         }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
-
-    android {
-    lint {
-        abortOnError = false
-    }
-}
 
 compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
