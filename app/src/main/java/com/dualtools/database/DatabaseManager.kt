@@ -5,11 +5,11 @@ import kotlinx.coroutines.withContext
 import java.sql.*
 
 enum class DatabaseType(val displayName: String, val defaultPort: Int, val driverClass: String) {
-    MYSQL("MySQL", 3306, "com.mysql.jdbc.Driver"),
+    MYSQL("MySQL", 3306, "com.mysql.cj.jdbc.Driver"),
     POSTGRESQL("PostgreSQL", 5432, "org.postgresql.Driver"),
     SQLITE("SQLite", 0, "org.sqlite.JDBC"),
-    SQLSERVER("SQL Server", 1433, "com.microsoft.sqlserver.jdbc.SQLServerDriver"),
-    ORACLE("Oracle", 1521, "oracle.jdbc.driver.OracleDriver")
+    SQLSERVER("SQL Server", 1433, "com.microsoft.sqlserver.jdbc.SQLServerDriver")
+    // Oracle 驱动不兼容 Android，已移除
 }
 
 data class DbConnection(
@@ -42,7 +42,7 @@ data class QueryResult(
 )
 
 sealed class DbResult<out T> {
-    data class Success<T>(val data: T) : DbResult<T>()
+    data class Success<T>(val T) : DbResult<T>()
     data class Error(val message: String) : DbResult<Nothing>()
 }
 
@@ -55,7 +55,12 @@ class DatabaseManager {
 
     suspend fun connect(config: DbConnection): DbResult<Unit> = withContext(Dispatchers.IO) {
         try {
-            Class.forName(config.type.driverClass)
+            // 安全加载驱动，单个驱动失败不影响其他
+            try {
+                Class.forName(config.type.driverClass)
+            } catch (e: Exception) {
+                return@withContext DbResult.Error("驱动加载失败: ${config.type.displayName} 驱动在当前设备不可用 (${e.javaClass.simpleName})")
+            }
 
             val url = when (config.type) {
                 DatabaseType.MYSQL ->
@@ -66,15 +71,11 @@ class DatabaseManager {
                     "jdbc:sqlite:${config.filePath}"
                 DatabaseType.SQLSERVER ->
                     "jdbc:sqlserver://${config.host}:${config.port};databaseName=${config.database};encrypt=false"
-                DatabaseType.ORACLE ->
-                    "jdbc:oracle:thin:@${config.host}:${config.port}:${config.database}"
             }
 
             connection = DriverManager.getConnection(url, config.username, config.password)
             dbType = config.type
             DbResult.Success(Unit)
-        } catch (e: ClassNotFoundException) {
-            DbResult.Error("找不到数据库驱动: ${e.message}")
         } catch (e: SQLException) {
             DbResult.Error("数据库连接失败: ${e.message}")
         } catch (e: Exception) {
