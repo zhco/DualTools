@@ -87,11 +87,13 @@ dependencies {
 
     implementation("commons-net:commons-net:3.10.0")
 
-    implementation("mysql:mysql-connector-java:5.1.49")
+    // MySQL Connector/J 8.x - Android 兼容
+    implementation("com.mysql:mysql-connector-j:8.3.0")
     implementation("org.postgresql:postgresql:42.7.1")
     implementation("org.xerial:sqlite-jdbc:3.44.1.0")
     implementation("com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre11")
-    implementation("com.oracle.database.jdbc:ojdbc8:21.9.0.0")
+    // Oracle ojdbc8 不兼容 Android，已移除
+    // implementation("com.oracle.database.jdbc:ojdbc8:21.9.0.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
