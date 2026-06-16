@@ -42,7 +42,7 @@ data class QueryResult(
 )
 
 sealed class DbResult<out T> {
-    data class Success<T>(val T) : DbResult<T>()
+    data class Success<T>(val data: T) : DbResult<T>()
     data class Error(val message: String) : DbResult<Nothing>()
 }
 
