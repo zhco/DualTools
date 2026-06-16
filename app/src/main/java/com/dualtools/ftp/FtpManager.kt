@@ -58,7 +58,7 @@ class FtpManager {
             connection = conn
             currentPath = ftpClient.printWorkingDirectory() ?: "/"
             FtpResult.Success(Unit)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             FtpResult.Error("连接异常: ${e.message}")
         }
     }
@@ -90,7 +90,7 @@ class FtpManager {
 
             currentPath = targetPath
             FtpResult.Success(items)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             FtpResult.Error("列出文件失败: ${e.message}")
         }
     }
@@ -107,7 +107,7 @@ class FtpManager {
             }
             currentPath = newPath
             listFiles(currentPath)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             FtpResult.Error("切换目录失败: ${e.message}")
         }
     }
@@ -119,7 +119,7 @@ class FtpManager {
                 return@withContext FtpResult.Error("创建文件夹失败")
             }
             FtpResult.Success(Unit)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             FtpResult.Error("创建文件夹失败: ${e.message}")
         }
     }
@@ -129,7 +129,7 @@ class FtpManager {
             val success = if (isDirectory) ftpClient.removeDirectory(path) else ftpClient.deleteFile(path)
             if (!success) return@withContext FtpResult.Error("删除失败")
             FtpResult.Success(Unit)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             FtpResult.Error("删除失败: ${e.message}")
         }
     }
@@ -140,7 +140,7 @@ class FtpManager {
                 return@withContext FtpResult.Error("重命名失败")
             }
             FtpResult.Success(Unit)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             FtpResult.Error("重命名失败: ${e.message}")
         }
     }
@@ -153,7 +153,7 @@ class FtpManager {
                 }
             }
             FtpResult.Success(Unit)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             FtpResult.Error("下载失败: ${e.message}")
         }
     }
@@ -167,10 +167,11 @@ class FtpManager {
                 }
             }
             FtpResult.Success(Unit)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             FtpResult.Error("上传失败: ${e.message}")
         }
     }
 
     fun getCurrentPath(): String = currentPath
 }
+
