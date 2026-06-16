@@ -58,7 +58,7 @@ class DatabaseManager {
             // 安全加载驱动，单个驱动失败不影响其他
             try {
                 Class.forName(config.type.driverClass)
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 return@withContext DbResult.Error("驱动加载失败: ${config.type.displayName} 驱动在当前设备不可用 (${e.javaClass.simpleName})")
             }
 
@@ -78,7 +78,7 @@ class DatabaseManager {
             DbResult.Success(Unit)
         } catch (e: SQLException) {
             DbResult.Error("数据库连接失败: ${e.message}")
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             DbResult.Error("连接异常: ${e.message}")
         }
     }
@@ -107,7 +107,7 @@ class DatabaseManager {
             }
             rs.close()
             DbResult.Success(tables)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             DbResult.Error("获取表列表失败: ${e.message}")
         }
     }
@@ -140,7 +140,7 @@ class DatabaseManager {
             }
             rs.close()
             DbResult.Success(columns)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             DbResult.Error("获取列信息失败: ${e.message}")
         }
     }
@@ -189,7 +189,7 @@ class DatabaseManager {
             }
         } catch (e: SQLException) {
             DbResult.Error("SQL 执行错误: ${e.message}")
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             DbResult.Error("执行异常: ${e.message}")
         }
     }
@@ -220,7 +220,7 @@ class DatabaseManager {
             pstmt.executeUpdate()
             pstmt.close()
             DbResult.Success(Unit)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             DbResult.Error("插入失败: ${e.message}")
         }
     }
@@ -242,7 +242,7 @@ class DatabaseManager {
             pstmt.executeUpdate()
             pstmt.close()
             DbResult.Success(Unit)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             DbResult.Error("更新失败: ${e.message}")
         }
     }
@@ -255,7 +255,7 @@ class DatabaseManager {
             stmt.executeUpdate(sql)
             stmt.close()
             DbResult.Success(Unit)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             DbResult.Error("删除失败: ${e.message}")
         }
     }
