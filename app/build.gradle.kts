@@ -85,15 +85,16 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
-    implementation("commons-net:commons-net:3.10.0")
+    // FTP - pure Java, Android compatible
+    implementation("commons-net:commons-net:3.9.0")
 
-    // MySQL Connector/J 8.x - Android 兼容
+    // Database - pure Java JDBC drivers only (no native libs)
     implementation("com.mysql:mysql-connector-j:8.3.0")
     implementation("org.postgresql:postgresql:42.7.1")
-    implementation("org.xerial:sqlite-jdbc:3.44.1.0")
-    implementation("com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre11")
-    // Oracle ojdbc8 不兼容 Android，已移除
-    // implementation("com.oracle.database.jdbc:ojdbc8:21.9.0.0")
+
+    // SQLite native lib and MSSQL removed for crash isolation
+    // implementation("org.xerial:sqlite-jdbc:3.44.1.0")
+    // implementation("com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre11")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
