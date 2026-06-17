@@ -17,7 +17,6 @@ class DatabaseViewModel : ViewModel() {
     var database by mutableStateOf("")
     var username by mutableStateOf("")
     var password by mutableStateOf("")
-    var filePath by mutableStateOf("/sdcard/data.db")
 
     var isConnected by mutableStateOf(false)
     var isLoading by mutableStateOf(false)
@@ -32,7 +31,6 @@ class DatabaseViewModel : ViewModel() {
     var sqlInput by mutableStateOf("")
     var sqlResult by mutableStateOf<QueryResult?>(null)
 
-    // Visual CRUD state
     var crudMode by mutableStateOf(CrudMode.VIEW)
     var editRowData by mutableStateOf<Map<String, String>>(emptyMap())
     var whereCondition by mutableStateOf("")
@@ -42,25 +40,17 @@ class DatabaseViewModel : ViewModel() {
     fun onTypeChanged(type: DatabaseType) {
         selectedType = type
         port = type.defaultPort.toString()
-        if (type == DatabaseType.SQLITE) {
-            host = ""
-            database = ""
-        }
     }
 
     fun connect() {
-        val config = if (selectedType == DatabaseType.SQLITE) {
-            DbConnection(type = selectedType, filePath = filePath)
-        } else {
-            DbConnection(
-                type = selectedType,
-                host = host.trim(),
-                port = port.toIntOrNull() ?: selectedType.defaultPort,
-                database = database.trim(),
-                username = username.trim(),
-                password = password
-            )
-        }
+        val config = DbConnection(
+            type = selectedType,
+            host = host.trim(),
+            port = port.toIntOrNull() ?: selectedType.defaultPort,
+            database = database.trim(),
+            username = username.trim(),
+            password = password
+        )
         isLoading = true
         statusMessage = "正在连接..."
         viewModelScope.launch {
@@ -110,7 +100,6 @@ class DatabaseViewModel : ViewModel() {
         selectedTable = tableName
         isLoading = true
         viewModelScope.launch {
-            // Load columns
             when (val colResult = dbManager.getTableColumns(tableName)) {
                 is DbResult.Success -> tableColumns = colResult.data
                 is DbResult.Error -> {
@@ -120,7 +109,6 @@ class DatabaseViewModel : ViewModel() {
                     return@launch
                 }
             }
-            // Load data
             when (val dataResult = dbManager.getTableData(tableName)) {
                 is DbResult.Success -> {
                     tableData = dataResult.data
@@ -231,11 +219,5 @@ class DatabaseViewModel : ViewModel() {
         }
     }
 
-    fun getConnectionInfo(): String {
-        return if (selectedType == DatabaseType.SQLITE) {
-            "SQLite: $filePath"
-        } else {
-            "$username@$host:$port/$database"
-        }
-    }
+    fun getConnectionInfo(): String = "$username@$host:$port/$database"
 }
