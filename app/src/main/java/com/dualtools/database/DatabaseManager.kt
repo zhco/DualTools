@@ -6,10 +6,7 @@ import java.sql.*
 
 enum class DatabaseType(val displayName: String, val defaultPort: Int, val driverClass: String) {
     MYSQL("MySQL", 3306, "com.mysql.cj.jdbc.Driver"),
-    POSTGRESQL("PostgreSQL", 5432, "org.postgresql.Driver"),
-    SQLITE("SQLite", 0, "org.sqlite.JDBC"),
-    SQLSERVER("SQL Server", 1433, "com.microsoft.sqlserver.jdbc.SQLServerDriver")
-    // Oracle 驱动不兼容 Android，已移除
+    POSTGRESQL("PostgreSQL", 5432, "org.postgresql.Driver")
 }
 
 data class DbConnection(
@@ -18,8 +15,7 @@ data class DbConnection(
     val port: Int = 0,
     val database: String = "",
     val username: String = "",
-    val password: String = "",
-    val filePath: String = "" // For SQLite
+    val password: String = ""
 )
 
 data class TableInfo(
@@ -42,7 +38,7 @@ data class QueryResult(
 )
 
 sealed class DbResult<out T> {
-    data class Success<T>(val data: T) : DbResult<T>()
+    data class Success<T>(val T) : DbResult<T>()
     data class Error(val message: String) : DbResult<Nothing>()
 }
 
@@ -55,11 +51,10 @@ class DatabaseManager {
 
     suspend fun connect(config: DbConnection): DbResult<Unit> = withContext(Dispatchers.IO) {
         try {
-            // 安全加载驱动，单个驱动失败不影响其他
             try {
                 Class.forName(config.type.driverClass)
             } catch (e: Throwable) {
-                return@withContext DbResult.Error("驱动加载失败: ${config.type.displayName} 驱动在当前设备不可用 (${e.javaClass.simpleName})")
+                return@withContext DbResult.Error("驱动加载失败: ${config.type.displayName} 驱动不可用 (${e.javaClass.simpleName}: ${e.message})")
             }
 
             val url = when (config.type) {
@@ -67,10 +62,6 @@ class DatabaseManager {
                     "jdbc:mysql://${config.host}:${config.port}/${config.database}?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf8"
                 DatabaseType.POSTGRESQL ->
                     "jdbc:postgresql://${config.host}:${config.port}/${config.database}"
-                DatabaseType.SQLITE ->
-                    "jdbc:sqlite:${config.filePath}"
-                DatabaseType.SQLSERVER ->
-                    "jdbc:sqlserver://${config.host}:${config.port};databaseName=${config.database};encrypt=false"
             }
 
             connection = DriverManager.getConnection(url, config.username, config.password)
@@ -79,14 +70,14 @@ class DatabaseManager {
         } catch (e: SQLException) {
             DbResult.Error("数据库连接失败: ${e.message}")
         } catch (e: Throwable) {
-            DbResult.Error("连接异常: ${e.message}")
+            DbResult.Error("连接异常: ${e.javaClass.simpleName}: ${e.message}")
         }
     }
 
     fun disconnect() {
         try {
             connection?.close()
-        } catch (_: Exception) {}
+        } catch (_: Throwable) {}
         connection = null
         dbType = null
     }
@@ -118,7 +109,6 @@ class DatabaseManager {
             val columns = mutableListOf<ColumnInfo>()
             val metaData = conn.metaData
 
-            // Get primary keys
             val pkRs = metaData.getPrimaryKeys(null, null, tableName)
             val pkColumns = mutableSetOf<String>()
             while (pkRs.next()) {
@@ -194,69 +184,62 @@ class DatabaseManager {
         }
     }
 
-    suspend fun getTableData(
-        tableName: String,
-        limit: Int = 100,
-        offset: Int = 0
-    ): DbResult<QueryResult> = withContext(Dispatchers.IO) {
-        val sql = "SELECT * FROM $tableName LIMIT $limit OFFSET $offset"
-        executeQuery(sql)
-    }
+    suspend fun getTableData(tableName: String, limit: Int = 100, offset: Int = 0): DbResult<QueryResult> =
+        withContext(Dispatchers.IO) {
+            val sql = "SELECT * FROM $tableName LIMIT $limit OFFSET $offset"
+            executeQuery(sql)
+        }
 
-    suspend fun insertRow(
-        tableName: String,
-        values: Map<String, String>
-    ): DbResult<Unit> = withContext(Dispatchers.IO) {
-        try {
-            val columns = values.keys.joinToString(", ")
-            val placeholders = values.keys.joinToString(", ") { "?" }
-            val sql = "INSERT INTO $tableName ($columns) VALUES ($placeholders)"
+    suspend fun insertRow(tableName: String, values: Map<String, String>): DbResult<Unit> =
+        withContext(Dispatchers.IO) {
+            try {
+                val columns = values.keys.joinToString(", ")
+                val placeholders = values.keys.joinToString(", ") { "?" }
+                val sql = "INSERT INTO $tableName ($columns) VALUES ($placeholders)"
 
-            val conn = connection ?: return@withContext DbResult.Error("未连接数据库")
-            val pstmt = conn.prepareStatement(sql)
-            values.values.forEachIndexed { index, value ->
-                pstmt.setString(index + 1, value)
+                val conn = connection ?: return@withContext DbResult.Error("未连接数据库")
+                val pstmt = conn.prepareStatement(sql)
+                values.values.forEachIndexed { index, value ->
+                    pstmt.setString(index + 1, value)
+                }
+                pstmt.executeUpdate()
+                pstmt.close()
+                DbResult.Success(Unit)
+            } catch (e: Throwable) {
+                DbResult.Error("插入失败: ${e.message}")
             }
-            pstmt.executeUpdate()
-            pstmt.close()
-            DbResult.Success(Unit)
-        } catch (e: Throwable) {
-            DbResult.Error("插入失败: ${e.message}")
         }
-    }
 
-    suspend fun updateRow(
-        tableName: String,
-        values: Map<String, String>,
-        whereClause: String
-    ): DbResult<Unit> = withContext(Dispatchers.IO) {
-        try {
-            val setClause = values.keys.joinToString(", ") { "$it = ?" }
-            val sql = "UPDATE $tableName SET $setClause WHERE $whereClause"
+    suspend fun updateRow(tableName: String, values: Map<String, String>, whereClause: String): DbResult<Unit> =
+        withContext(Dispatchers.IO) {
+            try {
+                val setClause = values.keys.joinToString(", ") { "$it = ?" }
+                val sql = "UPDATE $tableName SET $setClause WHERE $whereClause"
 
-            val conn = connection ?: return@withContext DbResult.Error("未连接数据库")
-            val pstmt = conn.prepareStatement(sql)
-            values.values.forEachIndexed { index, value ->
-                pstmt.setString(index + 1, value)
+                val conn = connection ?: return@withContext DbResult.Error("未连接数据库")
+                val pstmt = conn.prepareStatement(sql)
+                values.values.forEachIndexed { index, value ->
+                    pstmt.setString(index + 1, value)
+                }
+                pstmt.executeUpdate()
+                pstmt.close()
+                DbResult.Success(Unit)
+            } catch (e: Throwable) {
+                DbResult.Error("更新失败: ${e.message}")
             }
-            pstmt.executeUpdate()
-            pstmt.close()
-            DbResult.Success(Unit)
-        } catch (e: Throwable) {
-            DbResult.Error("更新失败: ${e.message}")
         }
-    }
 
-    suspend fun deleteRow(tableName: String, whereClause: String): DbResult<Unit> = withContext(Dispatchers.IO) {
-        try {
-            val sql = "DELETE FROM $tableName WHERE $whereClause"
-            val conn = connection ?: return@withContext DbResult.Error("未连接数据库")
-            val stmt = conn.createStatement()
-            stmt.executeUpdate(sql)
-            stmt.close()
-            DbResult.Success(Unit)
-        } catch (e: Throwable) {
-            DbResult.Error("删除失败: ${e.message}")
+    suspend fun deleteRow(tableName: String, whereClause: String): DbResult<Unit> =
+        withContext(Dispatchers.IO) {
+            try {
+                val sql = "DELETE FROM $tableName WHERE $whereClause"
+                val conn = connection ?: return@withContext DbResult.Error("未连接数据库")
+                val stmt = conn.createStatement()
+                stmt.executeUpdate(sql)
+                stmt.close()
+                DbResult.Success(Unit)
+            } catch (e: Throwable) {
+                DbResult.Error("删除失败: ${e.message}")
+            }
         }
-    }
 }
