@@ -72,37 +72,29 @@ fun DatabaseScreen(viewModel: DatabaseViewModel) {
                         }
                     }
 
-                    if (viewModel.selectedType != DatabaseType.SQLITE) {
-                        OutlinedTextField(
-                            value = viewModel.host, onValueChange = { viewModel.host = it },
-                            label = { Text("主机") }, modifier = Modifier.fillMaxWidth(), singleLine = true
-                        )
-                        OutlinedTextField(
-                            value = viewModel.port, onValueChange = { viewModel.port = it },
-                            label = { Text("端口") }, modifier = Modifier.fillMaxWidth(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true
-                        )
-                        OutlinedTextField(
-                            value = viewModel.database, onValueChange = { viewModel.database = it },
-                            label = { Text("数据库名") }, modifier = Modifier.fillMaxWidth(), singleLine = true
-                        )
-                        OutlinedTextField(
-                            value = viewModel.username, onValueChange = { viewModel.username = it },
-                            label = { Text("用户名") }, modifier = Modifier.fillMaxWidth(), singleLine = true
-                        )
-                        OutlinedTextField(
-                            value = viewModel.password, onValueChange = { viewModel.password = it },
-                            label = { Text("密码") },
-                            visualTransformation = PasswordVisualTransformation(),
-                            modifier = Modifier.fillMaxWidth(), singleLine = true
-                        )
-                    } else {
-                        OutlinedTextField(
-                            value = viewModel.filePath, onValueChange = { viewModel.filePath = it },
-                            label = { Text("数据库文件路径") }, modifier = Modifier.fillMaxWidth(), singleLine = true,
-                            placeholder = { Text("/sdcard/data.db") }
-                        )
-                    }
+                    OutlinedTextField(
+                        value = viewModel.host, onValueChange = { viewModel.host = it },
+                        label = { Text("主机") }, modifier = Modifier.fillMaxWidth(), singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = viewModel.port, onValueChange = { viewModel.port = it },
+                        label = { Text("端口") }, modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = viewModel.database, onValueChange = { viewModel.database = it },
+                        label = { Text("数据库名") }, modifier = Modifier.fillMaxWidth(), singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = viewModel.username, onValueChange = { viewModel.username = it },
+                        label = { Text("用户名") }, modifier = Modifier.fillMaxWidth(), singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = viewModel.password, onValueChange = { viewModel.password = it },
+                        label = { Text("密码") },
+                        visualTransformation = PasswordVisualTransformation(),
+                        modifier = Modifier.fillMaxWidth(), singleLine = true
+                    )
                 }
             },
             confirmButton = {
@@ -127,7 +119,7 @@ fun DatabaseScreen(viewModel: DatabaseViewModel) {
                     modifier = Modifier.heightIn(max = 400.dp)
                 ) {
                     items(viewModel.tableColumns) { col ->
-                        if (!col.isPrimaryKey || viewModel.selectedType == DatabaseType.SQLITE) {
+                        if (!col.isPrimaryKey) {
                             OutlinedTextField(
                                 value = insertValues[col.name] ?: "",
                                 onValueChange = { v ->
@@ -560,3 +552,4 @@ private fun SqlEditorView(viewModel: DatabaseViewModel) {
         }
     }
 }
+
